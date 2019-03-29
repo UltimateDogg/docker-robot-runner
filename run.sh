@@ -13,7 +13,6 @@ DEFAULT_LOG_LEVEL="TRACE" # Available levels: TRACE (default), DEBUG, INFO, WARN
 DEFAULT_RES="1280x1024x24"
 DEFAULT_OUTPUT_FOLDER=/opt/robot/reports
 DEFAULT_ROBOT_TESTS=/opt/robot/tests
-DEFAULT_GIT_BRANCH=master
 DEFAULT_PROCESS_COUNT=1
 
 # Use defaults for following if none specified as env var
@@ -23,7 +22,6 @@ PROCESS_COUNT=${PROCESS_COUNT:-$DEFAULT_PROCESS_COUNT}
 # OUTPUT_FOLDER env variable can also be overridden by -d command line argument.
 OUTPUT_FOLDER=${OUTPUT_FOLDER:-$DEFAULT_OUTPUT_FOLDER}
 ROBOT_TESTS=${ROBOT_TESTS:-$DEFAULT_ROBOT_TESTS}
-GIT_BRANCH=${GIT_BRANCH:-$DEFAULT_GIT_BRANCH}
 
 #No defaults for these
 VARIABLEFILES=
@@ -31,6 +29,7 @@ LISTENERS=
 ROBOT_TAGS=
 COMMIT_HASH=
 TEST_RUNNER=
+GIT_BRANCH=
 
 # get parameters for running the robot scripts
 while [ $# -gt 1 ]
@@ -78,20 +77,25 @@ do
 	shift
 done
 
-# Update the robot code by cloning the git repo. note this will be updated to the branch you specify.
+# go to correct directory
 cd $ROBOT_TESTS
-git reset --hard HEAD
-git clean -f -d
-git pull
 
-#if commit hash specified checkout that
-#commit hash looks like this "45ef55ac20ce2389c9180658fdba35f4a663d204"
-if [ "${COMMIT_HASH}" != "" ];then
-  echo "checking out commit hash ${COMMIT_HASH}"
-  git checkout ${COMMIT_HASH}
-else
-  echo "checking out branch ${GIT_BRANCH}"
-  git checkout ${GIT_BRANCH}
+# This is only triggered if you pass in a git param
+# Update the robot code by cloning the git repo. note this will be updated to the branch you specify.
+if [ "${COMMIT_HASH}" != "" ] || [ "${GIT_BRANCH}" != "" ]; then
+	git reset --hard HEAD
+	git clean -f -d
+	git pull
+	
+	#if commit hash specified checkout that
+	#commit hash looks like this "45ef55ac20ce2389c9180658fdba35f4a663d204"
+	if [ "${COMMIT_HASH}" != "" ];then
+	  echo "checking out commit hash ${COMMIT_HASH}"
+	  git checkout ${COMMIT_HASH}
+	else
+	  echo "checking out branch ${GIT_BRANCH}"
+	  git checkout ${GIT_BRANCH}
+	fi
 fi
 
 # Print some info
