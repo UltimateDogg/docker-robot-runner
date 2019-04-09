@@ -10,25 +10,16 @@ set -e
 
 # Set the defaults
 DEFAULT_LOG_LEVEL="TRACE" # Available levels: TRACE (default), DEBUG, INFO, WARN, NONE (no logging)
-DEFAULT_RES="1280x1024x24"
-DEFAULT_OUTPUT_FOLDER=/opt/robot/reports
-DEFAULT_ROBOT_TESTS=/opt/robot/tests
-DEFAULT_PROCESS_COUNT=1
+DEFAULT_ROBOT_TESTS=/opt/robotframework/tests
 
 # Use defaults for following if none specified as env var
 LOG_LEVEL=${LOG_LEVEL:-$DEFAULT_LOG_LEVEL}
-RES=${RES:-$DEFAULT_RES}
-PROCESS_COUNT=${PROCESS_COUNT:-$DEFAULT_PROCESS_COUNT}
-# OUTPUT_FOLDER env variable can also be overridden by -d command line argument.
-OUTPUT_FOLDER=${OUTPUT_FOLDER:-$DEFAULT_OUTPUT_FOLDER}
-ROBOT_TESTS=${ROBOT_TESTS:-$DEFAULT_ROBOT_TESTS}
 
 #No defaults for these
 VARIABLEFILES=
 LISTENERS=
 ROBOT_TAGS=
 COMMIT_HASH=
-TEST_RUNNER=
 GIT_BRANCH=
 
 # get parameters for running the robot scripts
@@ -43,10 +34,6 @@ do
     		;;
     	-e|--exclude)
     		ROBOT_TAGS="${ROBOT_TAGS} --exclude $2"
-    		shift
-    		;;
-    	-d|--outputdir)
-    		OUTPUT_FOLDER=$2
     		shift
     		;;
   		--listener)
@@ -69,20 +56,16 @@ do
     		GIT_BRANCH=$2
     		shift
     		;;
-   		--processes)
-    		PROCESS_COUNT=$2
-    		shift
-    		;;
 	esac
 	shift
 done
 
-# go to correct directory
-cd $ROBOT_TESTS
-
 # This is only triggered if you pass in a git param
 # Update the robot code by cloning the git repo. note this will be updated to the branch you specify.
 if [ "${COMMIT_HASH}" != "" ] || [ "${GIT_BRANCH}" != "" ]; then
+	# go to correct directory
+	cd $DEFAULT_ROBOT_TESTS
+
 	git reset --hard HEAD
 	git clean -f -d
 	git pull
@@ -115,13 +98,8 @@ else
   echo -e "Running just these robot tags ${ROBOT_TAGS}"
 fi
 
-# Pick out pabot vs robot depending on number of processes.
-if [ $PROCESS_COUNT -gt 1 ];then
-  TEST_RUNNER="pabot --processes ${PROCESS_COUNT}"
-else
-  TEST_RUNNER="robot"
-fi
+export ROBOT_OPTIONS="--loglevel ${LOG_LEVEL} ${VARIABLEFILES} ${VARIABLES} ${LISTENERS} ${ROBOT_TAGS}"
 
 # Start Xvfb and run robot in it
-echo -e "Starting xvfb-run on display 0 with resolution ${RES}"
-xvfb-run --server-args="-ac -screen 0 ${RES} +extension RANDR" ${TEST_RUNNER} --loglevel ${LOG_LEVEL} --outputdir ${OUTPUT_FOLDER} ${VARIABLEFILES} ${VARIABLES} ${LISTENERS} ${ROBOT_TAGS} ${ROBOT_TESTS}
+echo -e "Starting xvfb-run on display 0 with resolution ${SCREEN_WIDTH}x${SCREEN_HEIGHT}x${SCREEN_COLOUR_DEPTH}"
+source run-tests-in-virtual-screen.sh
