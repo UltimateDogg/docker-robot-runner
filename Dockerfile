@@ -1,4 +1,4 @@
-FROM ppodgorsek/robot-framework:latest
+FROM ppodgorsek/robot-framework:3.3.1
 
 MAINTAINER UltimateDogg
 LABEL Base Robot Framework in Docker container. Extension of ppodgorsek/robot-framework to add a few packages
