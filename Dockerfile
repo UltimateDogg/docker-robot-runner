@@ -10,7 +10,7 @@ RUN dnf install -y \
  	&& dnf clean all
 
 #install all the robot framework libraries and needed libraries beyond what is installed by the base image
-RUN pip install --no-cache-dir \
+RUN pip3 install --no-cache-dir \
 	'robotframework-angularjs==0.0.9 '  \
 	'robotframework-archivelibrary==0.4.0'
 
