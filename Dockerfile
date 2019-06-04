@@ -6,7 +6,7 @@ LABEL Base Robot Framework in Docker container. Extension of ppodgorsek/robot-fr
 # Install Packages not installed by base image
 RUN dnf install -y \
 		python2-crypto-2.6.1* \
-		python2-devel-2.7.16* \
+		python2-devel-2.7.15* \
 		git \
  	&& dnf clean all
 
@@ -14,7 +14,6 @@ RUN dnf install -y \
 RUN pip install --no-cache-dir \
 	'robotframework-angularjs==0.0.9 '  \
 	'robotframework-archivelibrary==0.4.0' \
-	'robotframework-pykafka==0.10' \
 	'pycrypto==2.6.1' \
  	'PyYAML==5.1'
 
